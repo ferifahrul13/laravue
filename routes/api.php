@@ -14,6 +14,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::namespace('api')->group(function () {
+    Route::prefix('v1')->group(function () {
+        Route::prefix('auth')->group(function () {
+            //dibawah ini adalah route publik, semua bisa mengakses
+
+            //Membuat User Baru
+            Route::post('register', 'AuthController@register');
+
+            // Login User
+            Route::post('login', 'AuthController@login');
+
+            // Refresh JWT Token
+            Route::get('refresh', 'AuthController@refresh');
+
+            //Dibawah ini hanya bisa diakses oleh user yang ter autentifikasi
+
+            // Logout user dari aplikasi
+            Route::post('logout', 'AuthController@logout')->middleware('auth:api');
+        });
+
+        Route::middleware('auth:api')->group(function () {
+            Route::apiResource('user', 'UserController');
+        });
+    });
 });
